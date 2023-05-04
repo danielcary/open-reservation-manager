@@ -4,7 +4,7 @@ import { Container, Row, Col, Form, Button, } from 'react-bootstrap';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 import Modal from 'react-bootstrap/Modal';
-import { AxiosRequestConfig } from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 

@@ -38,13 +38,13 @@ export async function loadDB(): Promise<Knex> {
         table.integer('schemaVersion');
     });
 
-    db('info').insert({ schemaVersion: 1 });
+   // db('info').insert({ schemaVersion: 1 });
 
     await db.schema.createTable('users', table => {
         table.increments('id');
-        table.string('name', 255)
-            .notNullable();
-        table.string('hashedPassword', 512);
+        table.string('name', 255).notNullable();
+        table.string('hashedPassword', 128).notNullable();
+        table.string('salt', 16).notNullable();
     });
 
     await db.destroy();
