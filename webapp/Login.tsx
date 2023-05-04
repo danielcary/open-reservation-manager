@@ -25,7 +25,9 @@ export default class LoginComponent extends React.Component<LoginComponentProps,
         };
     }
 
-    submit(): void {
+    submitCreds = (e: React.FormEvent): void => {
+        e.preventDefault();
+
         let userElement = document.getElementById("formUsername") as HTMLInputElement;
         let passElement = document.getElementById("formPassword") as HTMLInputElement;
 
@@ -53,7 +55,7 @@ export default class LoginComponent extends React.Component<LoginComponentProps,
                 {this.state.failed && <Alert variant='danger'>
                     Failed to login, bad credentials?
                 </Alert>}
-                <Form>
+                <Form onSubmit={this.submitCreds}>
                     <Form.Group className="mb-3" controlId="formUsername">
                         <Form.Label>Username</Form.Label>
                         <Form.Control type="text" placeholder="Enter username" />
@@ -62,7 +64,7 @@ export default class LoginComponent extends React.Component<LoginComponentProps,
                         <Form.Label>Password</Form.Label>
                         <Form.Control type="password" placeholder="Password" />
                     </Form.Group>
-                    <Button onClick={() => this.submit()} variant="primary">
+                    <Button variant="primary" type="submit">
                         Submit
                     </Button>
                 </Form>

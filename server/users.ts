@@ -7,7 +7,12 @@ import { loadDB } from './db';
 
 const route = Router();
 
-// only admin account can access
+export function hashPassword(pass: string, salt: string): string {
+    let derivedKey = pbkdf2Sync(pass, salt, 10000, 64, 'sha512');
+    return derivedKey.toString('hex');
+}
+
+// only admin account is allowed access
 route.use((_req, res, next) => {
     if (res.locals.auth.name == "admin") {
         next();
@@ -30,62 +35,48 @@ const addUserBody = yup.object({
 });
 
 route.post('/', (req, res) => {
-
     if (!addUserBody.isValidSync(req.body)) {
-        res.sendStatus(HttpStatusCode.BadRequest);
+        res.status(HttpStatusCode.BadRequest);
+        res.send('Bad name or password');
         return;
     }
 
     let user = addUserBody.cast(req.body);
 
-    let salt = randomBytes(8).toString('hex');
-    let hashedPassword = pbkdf2Sync(user.pass, salt, 10000, 64, 'sha512').toString('hex');
-
     loadDB().then(knex => {
-        return knex('users').insert({
-            name: user.name,
-            hashedPassword: hashedPassword,
-            salt: salt,
+        return knex('users').select('*').where('name', user.name);
+    }).then(vals => {
+        if (vals.length != 0) {
+            res.status(HttpStatusCode.BadRequest);
+            res.send('Username already taken!');
+            return;
+        }
+
+        let salt = randomBytes(8).toString('hex');
+        let hashedPassword = hashPassword(user.pass, salt);
+
+        loadDB().then(knex => {
+            return knex('users').insert({
+                name: user.name,
+                hashedPassword: hashedPassword,
+                salt: salt,
+            });
+        }).then(() => {
+            res.sendStatus(HttpStatusCode.Created);
         });
-    }).then(() => {
-        res.sendStatus(HttpStatusCode.Created);
-    })
-});
-
-const patchUserBody = yup.object({
-    pass: yup.string().required(),
-});
-
-route.patch('/:id', (req, res) => {
-    if (!patchUserBody.isValidSync(req.body)) {
-        res.sendStatus(HttpStatusCode.BadRequest);
-        return;
-    }
-
-    let user = patchUserBody.cast(req.body);
-
-    let salt = randomBytes(8).toString('hex');
-    let hashedPassword = pbkdf2Sync(user.pass, salt, 10000, 64, 'sha512').toString('hex');
-
-    loadDB().then(knex => {
-        return knex('users').where('id', req.params.id).update({
-            hashedPassword: hashedPassword,
-            salt: salt,
-        });
-    }).then(() => {
-        res.sendStatus(HttpStatusCode.Ok);
-    }).catch(err => {
-        console.error(err);
-        res.sendStatus(HttpStatusCode.InternalServerError);
     });
 });
 
 route.delete('/:id', (req, res) => {
-
     loadDB().then(knex => {
         return knex('users').where('id', req.params.id).delete();
-    }).then(() => {
-        res.sendStatus(HttpStatusCode.Ok);
+    }).then(num => {
+        if (num == 1) {
+            res.sendStatus(HttpStatusCode.Ok);
+        } else {
+            // Unknown or bad user ID 
+            res.sendStatus(HttpStatusCode.BadRequest);
+        }
     }).catch(err => {
         console.error(err);
         res.sendStatus(HttpStatusCode.InternalServerError);
