@@ -6,6 +6,7 @@ dotenv.config()
 
 import UsersRoute, { hashPassword } from './users';
 import EventsRoute from './events';
+import TablesRoute from './tables';
 import { loadDB } from './db';
 
 const app = express();
@@ -69,6 +70,7 @@ app.get('/login', (_req, res) => {
 
 app.use('/api/users', UsersRoute);
 app.use('/api/events', EventsRoute);
+app.use('/api/groupings', TablesRoute);
 
 
 app.listen(port, () => console.log(`listening on ${port}`))

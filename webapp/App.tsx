@@ -11,6 +11,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import LoginComponent from './Login';
 import EventTab from './EventTab';
 import UsersTab from './UsersTab';
+import TablesTab from './TablesTab';
 import Button from 'react-bootstrap/esm/Button';
 
 
@@ -24,7 +25,7 @@ class App extends React.Component<any, AppState> {
         super(props);
 
         this.state = {
-            auth: undefined
+            auth: { username: "admin", password: "password" }
         };
     }
 
@@ -64,7 +65,14 @@ class App extends React.Component<any, AppState> {
                 />
             }
             {this.state.auth &&
-                <Tabs defaultActiveKey="events">
+                <Tabs defaultActiveKey="rsvp">
+                    <Tab eventKey="rsvp" title='Reservations'>
+
+                    </Tab>
+                    <Tab eventKey="tables" title='Tables'>
+                        <br />
+                        <TablesTab axiosConfig={{ auth: this.state.auth }} />
+                    </Tab>
                     <Tab eventKey="events" title='Events'>
                         <EventTab />
                     </Tab>

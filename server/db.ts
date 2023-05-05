@@ -38,13 +38,38 @@ export async function loadDB(): Promise<Knex> {
         table.integer('schemaVersion');
     });
 
-   // db('info').insert({ schemaVersion: 1 });
+    await db('info').insert({ schemaVersion: 1 });
 
     await db.schema.createTable('users', table => {
         table.increments('id');
         table.string('name', 255).notNullable();
         table.string('hashedPassword', 128).notNullable();
         table.string('salt', 16).notNullable();
+    });
+
+    await db.schema.createTable('events', table => {
+        table.increments('id');
+        table.string('name', 255).notNullable();
+        table.datetime('startTime').notNullable();
+        table.smallint('notificationType').notNullable();
+        table.boolean('sms').notNullable();
+        table.boolean('email').notNullable();
+        table.integer('notificationTime').notNullable();
+    });
+
+    await db.schema.createTable('tableGroups', table => {
+        table.increments('id');
+        table.string('name', 255).notNullable();
+        table.string('desc', 512).notNullable();
+    });
+
+    await db.schema.createTable('tables', table => {
+        table.increments('id');
+        table.string('name', 128);
+        table.integer('capacity').notNullable();
+        table.integer('group_id').unsigned();
+
+        table.foreign('group_id').references('id').inTable('tableGroups');
     });
 
     await db.destroy();

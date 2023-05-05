@@ -5,6 +5,7 @@
   "main": "server/dist/main.js",
   "scripts": {
     "bld-srv": "npx tsc -p ./server",
+    "bld-app": "npx webpack --mode production",
     "dev-app": "npx webpack --mode development -w",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
